@@ -10,12 +10,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { shadow } from '../theme/shadows';
 
 const ConfirmBookingScreen = ({ route, navigation }) => {
+  const { theme } = useTheme();
   const { doctor, selectedDay, selectedTime } = route.params;
 
   const displayDoctor = {
@@ -24,46 +25,46 @@ const ConfirmBookingScreen = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom']}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.title}>Confirm Booking</Text>
+          <Text style={[styles.title, { color: theme.dark }]}>Confirm Booking</Text>
 
           {/* Summary Card */}
-          <View style={styles.card}>
+          <View style={[styles.card, { backgroundColor: theme.surface }]}>
             <View style={styles.doctorRow}>
               <Image source={{ uri: displayDoctor.avatar }} style={styles.avatar} />
               <View style={styles.doctorInfo}>
-                <Text style={styles.doctorName}>{displayDoctor.name}</Text>
-                <Text style={styles.doctorSpecialty}>{displayDoctor.specialty}</Text>
+                <Text style={[styles.doctorName, { color: theme.dark }]}>{displayDoctor.name}</Text>
+                <Text style={[styles.doctorSpecialty, { color: theme.grey }]}>{displayDoctor.specialty}</Text>
               </View>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
             <View style={styles.detailRow}>
-              <Ionicons name="calendar-outline" size={18} color={colors.secondary} />
-              <Text style={styles.detailLabel}>Date</Text>
-              <Text style={styles.detailValue}>{selectedDay}</Text>
+              <Ionicons name="calendar-outline" size={18} color={theme.secondary} />
+              <Text style={[styles.detailLabel, { color: theme.dark }]}>Date</Text>
+              <Text style={[styles.detailValue, { color: theme.dark }]}>{selectedDay}</Text>
             </View>
 
             <View style={styles.detailRow}>
-              <Ionicons name="time-outline" size={18} color={colors.secondary} />
-              <Text style={styles.detailLabel}>Time</Text>
-              <Text style={styles.detailValue}>{selectedTime}</Text>
+              <Ionicons name="time-outline" size={18} color={theme.secondary} />
+              <Text style={[styles.detailLabel, { color: theme.dark }]}>Time</Text>
+              <Text style={[styles.detailValue, { color: theme.dark }]}>{selectedTime}</Text>
             </View>
 
             <View style={styles.detailRow}>
-              <Ionicons name="cash-outline" size={18} color={colors.secondary} />
-              <Text style={styles.detailLabel}>Price</Text>
-              <Text style={styles.detailValue}>${displayDoctor.pricePerSession}/Session</Text>
+              <Ionicons name="cash-outline" size={18} color={theme.secondary} />
+              <Text style={[styles.detailLabel, { color: theme.dark }]}>Price</Text>
+              <Text style={[styles.detailValue, { color: theme.dark }]}>${displayDoctor.pricePerSession}/Session</Text>
             </View>
 
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
 
             <View style={styles.totalRow}>
-              <Text style={styles.totalLabel}>Total</Text>
-              <Text style={styles.totalValue}>${displayDoctor.pricePerSession}</Text>
+              <Text style={[styles.totalLabel, { color: theme.dark }]}>Total</Text>
+              <Text style={[styles.totalValue, { color: theme.primary }]}>${displayDoctor.pricePerSession}</Text>
             </View>
           </View>
         </ScrollView>
@@ -91,11 +92,9 @@ const ConfirmBookingScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   title: {
     ...typography.h2,
@@ -104,7 +103,6 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   card: {
-    backgroundColor: colors.white,
     marginHorizontal: spacing.md,
     padding: spacing.md,
     borderRadius: radius.lg,
@@ -127,15 +125,12 @@ const styles = StyleSheet.create({
   doctorName: {
     ...typography.body,
     fontWeight: '600',
-    color: colors.dark,
   },
   doctorSpecialty: {
     ...typography.bodySmall,
-    color: colors.grey,
   },
   divider: {
     height: 1,
-    backgroundColor: colors.lightGrey,
     marginVertical: spacing.sm,
   },
   detailRow: {
@@ -146,13 +141,11 @@ const styles = StyleSheet.create({
   },
   detailLabel: {
     ...typography.body,
-    color: colors.dark,
     flex: 1,
   },
   detailValue: {
     ...typography.body,
     fontWeight: '600',
-    color: colors.dark,
   },
   totalRow: {
     flexDirection: 'row',
@@ -165,14 +158,13 @@ const styles = StyleSheet.create({
   },
   totalValue: {
     ...typography.h3,
-    color: colors.primary,
   },
   buttonContainer: {
     padding: spacing.md,
     paddingBottom: spacing.xl,
   },
   confirmButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',

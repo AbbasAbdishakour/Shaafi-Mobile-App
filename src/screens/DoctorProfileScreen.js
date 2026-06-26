@@ -10,13 +10,14 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { shadow } from '../theme/shadows';
 import StarRating from '../components/StarRating';
 
 const DoctorProfileScreen = ({ route, navigation }) => {
+  const { theme } = useTheme();
   const { doctor } = route.params;
 
   const displayDoctor = {
@@ -30,57 +31,57 @@ const DoctorProfileScreen = ({ route, navigation }) => {
   const reviewCountDisplay = displayDoctor.reviewCount?.toLocaleString?.() || displayDoctor.reviewCount;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom']}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.avatarContainer}>
               <Image source={{ uri: displayDoctor.avatar }} style={styles.avatar} />
               {displayDoctor.verified && (
-                <View style={styles.verifiedBadge}>
-                  <Ionicons name="checkmark" size={14} color={colors.white} />
+                <View style={[styles.verifiedBadge, { borderColor: theme.surface }]}>
+                  <Ionicons name="checkmark" size={14} color="#FFFFFF" />
                 </View>
               )}
             </View>
-            <Text style={styles.name}>{displayDoctor.name}</Text>
-            <Text style={styles.meta}>{displayDoctor.specialty} • {displayDoctor.hospital}</Text>
+            <Text style={[styles.name, { color: theme.dark }]}>{displayDoctor.name}</Text>
+            <Text style={[styles.meta, { color: theme.grey }]}>{displayDoctor.specialty} • {displayDoctor.hospital}</Text>
             <View style={styles.ratingRow}>
               <StarRating rating={Number(displayDoctor.rating)} size={16} />
-              <Text style={styles.reviewCount}>({reviewCountDisplay} reviews)</Text>
+              <Text style={[styles.reviewCount, { color: theme.grey }]}>({reviewCountDisplay} reviews)</Text>
             </View>
           </View>
 
           {/* Stats Row */}
-          <View style={styles.statsRow}>
+          <View style={[styles.statsRow, { backgroundColor: theme.surface }]}>
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{displayDoctor.experience}+</Text>
-              <Text style={styles.statLabel}>Years Exp.</Text>
+              <Text style={[styles.statValue, { color: theme.primary }]}>{displayDoctor.experience}+</Text>
+              <Text style={[styles.statLabel, { color: theme.grey }]}>Years Exp.</Text>
             </View>
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>{Math.floor(Number(displayDoctor.reviewCount) / 1000)}K+</Text>
-              <Text style={styles.statLabel}>Reviews</Text>
+              <Text style={[styles.statValue, { color: theme.primary }]}>{Math.floor(Number(displayDoctor.reviewCount) / 1000)}K+</Text>
+              <Text style={[styles.statLabel, { color: theme.grey }]}>Reviews</Text>
             </View>
-            <View style={styles.divider} />
+            <View style={[styles.divider, { backgroundColor: theme.border }]} />
             <View style={styles.statItem}>
-              <Text style={styles.statValue}>${displayDoctor.pricePerSession}</Text>
-              <Text style={styles.statLabel}>Per Session</Text>
+              <Text style={[styles.statValue, { color: theme.primary }]}>${displayDoctor.pricePerSession}</Text>
+              <Text style={[styles.statLabel, { color: theme.grey }]}>Per Session</Text>
             </View>
           </View>
 
           {/* About */}
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>About</Text>
-            <Text style={styles.bio} numberOfLines={3}>{displayDoctor.bio}</Text>
+            <Text style={[styles.sectionTitle, { color: theme.dark }]}>About</Text>
+            <Text style={[styles.bio, { color: theme.grey }]} numberOfLines={3}>{displayDoctor.bio}</Text>
             <Pressable>
-              <Text style={styles.readMore}>Read more</Text>
+              <Text style={[styles.readMore, { color: theme.primary }]}>Read more</Text>
             </Pressable>
           </View>
         </ScrollView>
 
         {/* Book Button */}
-        <View style={styles.buttonContainer}>
+        <View style={[styles.buttonContainer, { backgroundColor: theme.background }]}>
           <Pressable
             style={styles.bookButton}
             onPress={() => navigation.navigate('Booking', { doctor: displayDoctor })}
@@ -96,11 +97,9 @@ const DoctorProfileScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   header: {
     alignItems: 'center',
@@ -120,14 +119,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 4,
     right: 4,
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     width: 24,
     height: 24,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 3,
-    borderColor: colors.white,
   },
   name: {
     ...typography.h2,
@@ -135,7 +133,6 @@ const styles = StyleSheet.create({
   },
   meta: {
     ...typography.bodySmall,
-    color: colors.grey,
     textAlign: 'center',
     marginTop: spacing.xs,
   },
@@ -147,11 +144,9 @@ const styles = StyleSheet.create({
   },
   reviewCount: {
     ...typography.bodySmall,
-    color: colors.grey,
   },
   statsRow: {
     flexDirection: 'row',
-    backgroundColor: colors.white,
     marginHorizontal: spacing.md,
     marginTop: spacing.lg,
     borderRadius: radius.lg,
@@ -164,16 +159,13 @@ const styles = StyleSheet.create({
   },
   statValue: {
     ...typography.h3,
-    color: colors.primary,
   },
   statLabel: {
     ...typography.label,
-    color: colors.grey,
     marginTop: 2,
   },
   divider: {
     width: 1,
-    backgroundColor: colors.lightGrey,
   },
   section: {
     paddingHorizontal: spacing.md,
@@ -186,22 +178,19 @@ const styles = StyleSheet.create({
   },
   bio: {
     ...typography.bodySmall,
-    color: colors.grey,
     lineHeight: 20,
   },
   readMore: {
     ...typography.bodySmall,
-    color: colors.primary,
     fontWeight: '500',
     marginTop: spacing.xs,
   },
   buttonContainer: {
     padding: spacing.md,
     paddingBottom: spacing.xl,
-    backgroundColor: colors.tertiary,
   },
   bookButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',

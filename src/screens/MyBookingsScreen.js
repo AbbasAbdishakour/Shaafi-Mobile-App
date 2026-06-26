@@ -1,5 +1,5 @@
 // src/screens/MyBookingsScreen.js
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   View,
   Text,
@@ -10,7 +10,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { supabase } from '../config/supabase';
@@ -25,6 +25,7 @@ const tabs = [
 ];
 
 const MyBookingsScreen = () => {
+  const { theme } = useTheme();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('all');
   const [bookings, setBookings] = useState([]);
@@ -43,7 +44,6 @@ const MyBookingsScreen = () => {
     }
   };
 
-  // Refresh bookings every time the screen is focused
   useFocusEffect(
     useCallback(() => {
       fetchBookings();
@@ -56,20 +56,24 @@ const MyBookingsScreen = () => {
       : bookings.filter((b) => b.status === activeTab);
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <View style={styles.container}>
-        {/* Filter Tabs */}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['top']}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.tabRow}>
           {tabs.map((tab) => (
             <Pressable
               key={tab.key}
-              style={[styles.tab, activeTab === tab.key && styles.tabActive]}
+              style={[
+                styles.tab,
+                { backgroundColor: theme.surface, borderColor: theme.border },
+                activeTab === tab.key && { backgroundColor: theme.primary, borderColor: theme.primary },
+              ]}
               onPress={() => setActiveTab(tab.key)}
             >
               <Text
                 style={[
                   styles.tabText,
-                  activeTab === tab.key && styles.tabTextActive,
+                  { color: theme.grey },
+                  activeTab === tab.key && { color: '#FFFFFF' },
                 ]}
               >
                 {tab.label}
@@ -78,7 +82,6 @@ const MyBookingsScreen = () => {
           ))}
         </View>
 
-        {/* Bookings List */}
         <FlatList
           data={filteredBookings}
           keyExtractor={(item) => item.id}
@@ -86,8 +89,8 @@ const MyBookingsScreen = () => {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="calendar-outline" size={48} color={colors.lightGrey} />
-              <Text style={styles.emptyText}>No bookings yet</Text>
+              <Ionicons name="calendar-outline" size={48} color={theme.lightGrey} />
+              <Text style={[styles.emptyText, { color: theme.grey }]}>No bookings yet</Text>
             </View>
           }
           renderItem={({ item }) => <BookingCard booking={item} />}
@@ -100,11 +103,9 @@ const MyBookingsScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   tabRow: {
     flexDirection: 'row',
@@ -117,21 +118,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.sm,
     borderRadius: radius.full,
-    backgroundColor: colors.white,
     borderWidth: 1,
-    borderColor: colors.lightGrey,
-  },
-  tabActive: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
   },
   tabText: {
     ...typography.bodySmall,
     fontWeight: '500',
-    color: colors.grey,
-  },
-  tabTextActive: {
-    color: colors.white,
   },
   list: {
     paddingTop: spacing.sm,
@@ -143,7 +134,6 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...typography.h3,
-    color: colors.grey,
     marginTop: spacing.md,
   },
 });

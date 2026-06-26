@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { supabase } from '../config/supabase';
@@ -25,6 +25,7 @@ const paymentMethods = [
 ];
 
 const PaymentScreen = ({ route, navigation }) => {
+  const { theme } = useTheme();
   const { user } = useAuth();
   const { doctor, selectedDay, selectedTime } = route.params;
 
@@ -37,7 +38,7 @@ const PaymentScreen = ({ route, navigation }) => {
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ visible: false, title: '', message: '', icon: '', iconColor: '' });
 
-  const showAlert = (title, message, icon = 'close-circle', iconColor = colors.danger) => {
+  const showAlert = (title, message, icon = 'close-circle', iconColor = theme.danger) => {
     setAlert({ visible: true, title, message, icon, iconColor });
   };
 
@@ -73,73 +74,71 @@ const PaymentScreen = ({ route, navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom']}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView showsVerticalScrollIndicator={false}>
-          <Text style={styles.title}>Payment</Text>
+          <Text style={[styles.title, { color: theme.dark }]}>Payment</Text>
 
-          {/* Amount Display */}
           <View style={styles.amountContainer}>
-            <Text style={styles.amount}>${displayDoctor.pricePerSession}</Text>
-            <Text style={styles.amountLabel}>Session Fee</Text>
+            <Text style={[styles.amount, { color: theme.primary }]}>${displayDoctor.pricePerSession}</Text>
+            <Text style={[styles.amountLabel, { color: theme.grey }]}>Session Fee</Text>
           </View>
 
-          {/* Payment Method Selection */}
-          <Text style={styles.sectionTitle}>Select Payment Method</Text>
+          <Text style={[styles.sectionTitle, { color: theme.dark }]}>Select Payment Method</Text>
           {paymentMethods.map((method) => (
             <Pressable
               key={method.id}
               style={[
                 styles.methodRow,
-                selectedMethod === method.id && styles.methodRowSelected,
+                { backgroundColor: theme.surface, borderColor: theme.border },
+                selectedMethod === method.id && { borderColor: theme.primary },
               ]}
               onPress={() => setSelectedMethod(method.id)}
             >
               <Ionicons
                 name={method.icon}
                 size={22}
-                color={selectedMethod === method.id ? colors.primary : colors.secondary}
+                color={selectedMethod === method.id ? theme.primary : theme.secondary}
               />
-              <Text style={styles.methodLabel}>{method.label}</Text>
+              <Text style={[styles.methodLabel, { color: theme.dark }]}>{method.label}</Text>
               <View
                 style={[
                   styles.radio,
-                  selectedMethod === method.id && styles.radioSelected,
+                  { borderColor: theme.border },
+                  selectedMethod === method.id && { borderColor: theme.primary },
                 ]}
               >
                 {selectedMethod === method.id && (
-                  <View style={styles.radioDot} />
+                  <View style={[styles.radioDot, { backgroundColor: theme.primary }]} />
                 )}
               </View>
             </Pressable>
           ))}
 
-          {/* Card Details */}
           {selectedMethod === 'card' && (
             <View style={styles.cardDetails}>
-              <Text style={styles.inputLabel}>Card Number</Text>
+              <Text style={[styles.inputLabel, { color: theme.secondary }]}>Card Number</Text>
               <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: theme.inputBg, color: theme.dark }]}
                 placeholder="**** **** **** 1234"
-                placeholderTextColor={colors.grey}
+                placeholderTextColor={theme.grey}
                 keyboardType="number-pad"
               />
-
               <View style={styles.row}>
                 <View style={styles.halfInput}>
-                  <Text style={styles.inputLabel}>Expiry Date</Text>
+                  <Text style={[styles.inputLabel, { color: theme.secondary }]}>Expiry Date</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.dark }]}
                     placeholder="MM/YY"
-                    placeholderTextColor={colors.grey}
+                    placeholderTextColor={theme.grey}
                   />
                 </View>
                 <View style={styles.halfInput}>
-                  <Text style={styles.inputLabel}>CVV</Text>
+                  <Text style={[styles.inputLabel, { color: theme.secondary }]}>CVV</Text>
                   <TextInput
-                    style={styles.input}
+                    style={[styles.input, { backgroundColor: theme.inputBg, color: theme.dark }]}
                     placeholder="***"
-                    placeholderTextColor={colors.grey}
+                    placeholderTextColor={theme.grey}
                     keyboardType="number-pad"
                   />
                 </View>
@@ -148,7 +147,6 @@ const PaymentScreen = ({ route, navigation }) => {
           )}
         </ScrollView>
 
-        {/* Pay Button */}
         <View style={styles.buttonContainer}>
           <Pressable
             style={[styles.payButton, loading && styles.payButtonDisabled]}
@@ -156,7 +154,7 @@ const PaymentScreen = ({ route, navigation }) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={colors.white} />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.payButtonText}>Pay ${displayDoctor.pricePerSession} Now</Text>
             )}
@@ -164,7 +162,6 @@ const PaymentScreen = ({ route, navigation }) => {
         </View>
       </View>
 
-      {/* Payment Error Alert */}
       <ShaafiAlert
         visible={alert.visible}
         title={alert.title}
@@ -181,11 +178,9 @@ const PaymentScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   title: {
     ...typography.h2,
@@ -200,11 +195,9 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 40,
     fontWeight: '700',
-    color: colors.primary,
   },
   amountLabel: {
     ...typography.bodySmall,
-    color: colors.grey,
     marginTop: spacing.xs,
   },
   sectionTitle: {
@@ -215,21 +208,15 @@ const styles = StyleSheet.create({
   methodRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
     marginHorizontal: spacing.md,
     marginBottom: spacing.sm,
     padding: spacing.md,
     borderRadius: radius.lg,
     borderWidth: 1.5,
-    borderColor: colors.lightGrey,
     gap: spacing.sm,
-  },
-  methodRowSelected: {
-    borderColor: colors.primary,
   },
   methodLabel: {
     ...typography.body,
-    color: colors.dark,
     flex: 1,
   },
   radio: {
@@ -237,18 +224,13 @@ const styles = StyleSheet.create({
     height: 22,
     borderRadius: 11,
     borderWidth: 2,
-    borderColor: colors.lightGrey,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  radioSelected: {
-    borderColor: colors.primary,
   },
   radioDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: colors.primary,
   },
   cardDetails: {
     paddingHorizontal: spacing.md,
@@ -256,17 +238,14 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     ...typography.label,
-    color: colors.secondary,
     marginBottom: spacing.xs,
     marginTop: spacing.sm,
   },
   input: {
-    backgroundColor: colors.tertiary,
     height: 48,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     ...typography.body,
-    color: colors.dark,
   },
   row: {
     flexDirection: 'row',
@@ -280,7 +259,7 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   payButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',

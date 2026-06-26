@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { supabase } from '../config/supabase';
@@ -17,6 +17,7 @@ import DoctorCardSmall from '../components/DoctorCardSmall';
 import SpecialtyChip from '../components/SpecialtyChip';
 
 const DoctorsScreen = ({ navigation }) => {
+  const { theme } = useTheme();
   const [search, setSearch] = useState('');
   const [selectedSpecialty, setSelectedSpecialty] = useState(null);
   const [doctors, setDoctors] = useState([]);
@@ -58,16 +59,16 @@ const DoctorsScreen = ({ navigation }) => {
   });
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['top']}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         {/* Search Bar */}
         <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={20} color={colors.grey} />
+          <View style={[styles.searchBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="search-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: theme.dark }]}
               placeholder="Search Doctor or Specialty"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
               value={search}
               onChangeText={setSearch}
             />
@@ -105,9 +106,9 @@ const DoctorsScreen = ({ navigation }) => {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="search-outline" size={48} color={colors.lightGrey} />
-              <Text style={styles.emptyText}>No doctors found</Text>
-              <Text style={styles.emptySubtext}>Try adjusting your search or filters</Text>
+              <Ionicons name="search-outline" size={48} color={theme.lightGrey} />
+              <Text style={[styles.emptyText, { color: theme.grey }]}>No doctors found</Text>
+              <Text style={[styles.emptySubtext, { color: theme.grey }]}>Try adjusting your search or filters</Text>
             </View>
           }
           renderItem={({ item }) => (
@@ -125,11 +126,9 @@ const DoctorsScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   searchContainer: {
     paddingHorizontal: spacing.md,
@@ -138,18 +137,15 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
     borderRadius: radius.full,
     height: 48,
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.lightGrey,
   },
   searchInput: {
     flex: 1,
     ...typography.body,
-    color: colors.dark,
   },
   chipScroll: {
     paddingHorizontal: spacing.md,
@@ -165,12 +161,10 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     ...typography.h3,
-    color: colors.grey,
     marginTop: spacing.md,
   },
   emptySubtext: {
     ...typography.bodySmall,
-    color: colors.grey,
     marginTop: spacing.xs,
   },
 });

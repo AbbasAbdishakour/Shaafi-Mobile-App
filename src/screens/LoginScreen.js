@@ -11,13 +11,14 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { useAuth } from '../context/AuthContext';
 import ShaafiAlert from '../components/ShaafiAlert';
 
 const LoginScreen = ({ navigation }) => {
+  const { theme } = useTheme();
   const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -25,7 +26,7 @@ const LoginScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [alert, setAlert] = useState({ visible: false, title: '', message: '', icon: '', iconColor: '' });
 
-  const showAlert = (title, message, icon = 'alert-circle', iconColor = colors.warning) => {
+  const showAlert = (title, message, icon = 'alert-circle', iconColor = theme.warning) => {
     setAlert({ visible: true, title, message, icon, iconColor });
   };
 
@@ -35,7 +36,7 @@ const LoginScreen = ({ navigation }) => {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      showAlert('Missing Fields', 'Please fill in all fields to sign in.', 'information-circle', colors.primary);
+      showAlert('Missing Fields', 'Please fill in all fields to sign in.', 'information-circle', theme.primary);
       return;
     }
     setLoading(true);
@@ -48,7 +49,7 @@ const LoginScreen = ({ navigation }) => {
       } else if (message.includes('Email not confirmed')) {
         message = 'Please verify your email address before signing in. Check your inbox for the verification link.';
       }
-      showAlert('Login Failed', message, 'close-circle', colors.danger);
+      showAlert('Login Failed', message, 'close-circle', theme.danger);
     } finally {
       setLoading(false);
     }
@@ -56,27 +57,25 @@ const LoginScreen = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.surface }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <View style={styles.content}>
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Ionicons name="medical" size={48} color={colors.primary} />
+            <Ionicons name="medical" size={48} color={theme.primary} />
           </View>
-          <Text style={styles.title}>Welcome to Shaafi</Text>
-          <Text style={styles.subtitle}>Sign in to book appointments</Text>
+          <Text style={[styles.title, { color: theme.primary }]}>Welcome to Shaafi</Text>
+          <Text style={[styles.subtitle, { color: theme.grey }]}>Sign in to book appointments</Text>
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color={colors.grey} />
+          <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
+            <Ionicons name="mail-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.dark }]}
               placeholder="Email"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -84,12 +83,12 @@ const LoginScreen = ({ navigation }) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={colors.grey} />
+          <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
+            <Ionicons name="lock-closed-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.dark }]}
               placeholder="Password"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -98,7 +97,7 @@ const LoginScreen = ({ navigation }) => {
               <Ionicons
                 name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color={colors.grey}
+                color={theme.grey}
               />
             </Pressable>
           </View>
@@ -109,23 +108,21 @@ const LoginScreen = ({ navigation }) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={colors.white} />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.buttonText}>Sign In</Text>
             )}
           </Pressable>
         </View>
 
-        {/* Register Link */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Don't have an account? </Text>
+          <Text style={[styles.footerText, { color: theme.grey }]}>Don't have an account? </Text>
           <Pressable onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.footerLink}>Sign Up</Text>
+            <Text style={[styles.footerLink, { color: theme.primary }]}>Sign Up</Text>
           </Pressable>
         </View>
       </View>
 
-      {/* Alert Modal */}
       <ShaafiAlert
         visible={alert.visible}
         title={alert.title}
@@ -142,7 +139,6 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
   },
   content: {
     flex: 1,
@@ -157,18 +153,16 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.primary + '15',
+    backgroundColor: '#2F80ED' + '15',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
   title: {
     ...typography.h1,
-    color: colors.primary,
   },
   subtitle: {
     ...typography.body,
-    color: colors.grey,
     marginTop: spacing.xs,
   },
   form: {
@@ -177,7 +171,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.tertiary,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     height: 52,
@@ -186,10 +179,9 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     ...typography.body,
-    color: colors.dark,
   },
   button: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',
@@ -209,12 +201,10 @@ const styles = StyleSheet.create({
   },
   footerText: {
     ...typography.body,
-    color: colors.grey,
   },
   footerLink: {
     ...typography.body,
     fontWeight: '600',
-    color: colors.primary,
   },
 });
 

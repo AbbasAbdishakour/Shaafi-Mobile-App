@@ -9,7 +9,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { shadow } from '../theme/shadows';
@@ -36,6 +36,7 @@ const dateMapping = {
 };
 
 const BookingScreen = ({ route, navigation }) => {
+  const { theme } = useTheme();
   const { doctor } = route.params;
 
   const displayDoctor = {
@@ -51,15 +52,15 @@ const BookingScreen = ({ route, navigation }) => {
   const canContinue = selectedDay && selectedTime;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['bottom']}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <ScrollView showsVerticalScrollIndicator={false}>
           {/* Doctor Summary Card */}
-          <View style={styles.summaryCard}>
+          <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
             <Image source={{ uri: displayDoctor.avatar }} style={styles.avatar} />
             <View style={styles.summaryInfo}>
-              <Text style={styles.doctorName}>{displayDoctor.name}</Text>
-              <Text style={styles.doctorSpecialty}>{displayDoctor.specialty}</Text>
+              <Text style={[styles.doctorName, { color: theme.dark }]}>{displayDoctor.name}</Text>
+              <Text style={[styles.doctorSpecialty, { color: theme.grey }]}>{displayDoctor.specialty}</Text>
             </View>
             <View style={styles.priceBadge}>
               <Text style={styles.priceText}>${displayDoctor.pricePerSession}</Text>
@@ -67,7 +68,7 @@ const BookingScreen = ({ route, navigation }) => {
           </View>
 
           {/* Day Picker */}
-          <Text style={styles.sectionTitle}>Select Day</Text>
+          <Text style={[styles.sectionTitle, { color: theme.dark }]}>Select Day</Text>
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
@@ -85,7 +86,7 @@ const BookingScreen = ({ route, navigation }) => {
           </ScrollView>
 
           {/* Time Slot Picker */}
-          <Text style={styles.sectionTitle}>Available Time</Text>
+          <Text style={[styles.sectionTitle, { color: theme.dark }]}>Available Time</Text>
           <View style={styles.timeGrid}>
             {displayDoctor.timeSlots?.map((slot) => (
               <TimeSlotButton
@@ -101,7 +102,7 @@ const BookingScreen = ({ route, navigation }) => {
         {/* Continue Button */}
         <View style={styles.buttonContainer}>
           <Pressable
-            style={[styles.continueButton, !canContinue && styles.continueButtonDisabled]}
+            style={[styles.continueButton, !canContinue && { backgroundColor: theme.lightGrey }]}
             disabled={!canContinue}
             onPress={() =>
               navigation.navigate('ConfirmBooking', {
@@ -122,16 +123,13 @@ const BookingScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   summaryCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
     margin: spacing.md,
     padding: spacing.md,
     borderRadius: radius.lg,
@@ -149,22 +147,20 @@ const styles = StyleSheet.create({
   doctorName: {
     ...typography.body,
     fontWeight: '600',
-    color: colors.dark,
   },
   doctorSpecialty: {
     ...typography.bodySmall,
-    color: colors.grey,
     marginTop: 2,
   },
   priceBadge: {
-    backgroundColor: colors.primary + '15',
+    backgroundColor: '#2F80ED' + '15',
     paddingHorizontal: spacing.sm,
     paddingVertical: spacing.xs,
     borderRadius: radius.full,
   },
   priceText: {
     ...typography.bodySmall,
-    color: colors.primary,
+    color: '#2F80ED',
     fontWeight: '600',
   },
   sectionTitle: {
@@ -188,14 +184,11 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.xl,
   },
   continueButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  continueButtonDisabled: {
-    backgroundColor: colors.lightGrey,
   },
   continueButtonText: {
     ...typography.button,

@@ -12,13 +12,14 @@ import {
   ScrollView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { useAuth } from '../context/AuthContext';
 import ShaafiAlert from '../components/ShaafiAlert';
 
 const RegisterScreen = ({ navigation }) => {
+  const { theme } = useTheme();
   const { signUp } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -28,7 +29,7 @@ const RegisterScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [alert, setAlert] = useState({ visible: false, title: '', message: '', icon: '', iconColor: '', onConfirm: null });
 
-  const showAlert = (title, message, icon = 'alert-circle', iconColor = colors.warning, onConfirm = null) => {
+  const showAlert = (title, message, icon = 'alert-circle', iconColor = theme.warning, onConfirm = null) => {
     setAlert({ visible: true, title, message, icon, iconColor, onConfirm });
   };
 
@@ -38,15 +39,15 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     if (!name || !email || !password || !confirmPassword) {
-      showAlert('Missing Fields', 'Please fill in all fields to create your account.', 'information-circle', colors.primary);
+      showAlert('Missing Fields', 'Please fill in all fields to create your account.', 'information-circle', theme.primary);
       return;
     }
     if (password !== confirmPassword) {
-      showAlert('Password Mismatch', 'The passwords you entered do not match. Please try again.', 'lock-closed', colors.warning);
+      showAlert('Password Mismatch', 'The passwords you entered do not match. Please try again.', 'lock-closed', theme.warning);
       return;
     }
     if (password.length < 6) {
-      showAlert('Weak Password', 'Password must be at least 6 characters long for your security.', 'shield-outline', colors.warning);
+      showAlert('Weak Password', 'Password must be at least 6 characters long for your security.', 'shield-outline', theme.warning);
       return;
     }
     setLoading(true);
@@ -56,7 +57,7 @@ const RegisterScreen = ({ navigation }) => {
         'Account Created!',
         'Your account has been created successfully. Please check your email to verify your account, then sign in.',
         'checkmark-circle',
-        colors.success,
+        theme.success,
         () => navigation.goBack()
       );
     } catch (error) {
@@ -64,7 +65,7 @@ const RegisterScreen = ({ navigation }) => {
       if (message.includes('already registered')) {
         message = 'An account with this email already exists. Please sign in instead.';
       }
-      showAlert('Registration Failed', message, 'close-circle', colors.danger);
+      showAlert('Registration Failed', message, 'close-circle', theme.danger);
     } finally {
       setLoading(false);
     }
@@ -72,7 +73,7 @@ const RegisterScreen = ({ navigation }) => {
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={[styles.container, { backgroundColor: theme.surface }]}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
       <ScrollView
@@ -80,34 +81,32 @@ const RegisterScreen = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Header */}
         <View style={styles.header}>
           <View style={styles.iconContainer}>
-            <Ionicons name="person-add" size={40} color={colors.primary} />
+            <Ionicons name="person-add" size={40} color={theme.primary} />
           </View>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Join Shaafi to book appointments</Text>
+          <Text style={[styles.title, { color: theme.primary }]}>Create Account</Text>
+          <Text style={[styles.subtitle, { color: theme.grey }]}>Join Shaafi to book appointments</Text>
         </View>
 
-        {/* Form */}
         <View style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="person-outline" size={20} color={colors.grey} />
+          <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
+            <Ionicons name="person-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.dark }]}
               placeholder="Full Name"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
               value={name}
               onChangeText={setName}
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color={colors.grey} />
+          <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
+            <Ionicons name="mail-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.dark }]}
               placeholder="Email"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -115,12 +114,12 @@ const RegisterScreen = ({ navigation }) => {
             />
           </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={colors.grey} />
+          <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
+            <Ionicons name="lock-closed-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.dark }]}
               placeholder="Password"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
               value={password}
               onChangeText={setPassword}
               secureTextEntry={!showPassword}
@@ -129,17 +128,17 @@ const RegisterScreen = ({ navigation }) => {
               <Ionicons
                 name={showPassword ? 'eye-outline' : 'eye-off-outline'}
                 size={20}
-                color={colors.grey}
+                color={theme.grey}
               />
             </Pressable>
           </View>
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color={colors.grey} />
+          <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
+            <Ionicons name="lock-closed-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: theme.dark }]}
               placeholder="Confirm Password"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               secureTextEntry
@@ -152,23 +151,21 @@ const RegisterScreen = ({ navigation }) => {
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator color={colors.white} />
+              <ActivityIndicator color="#FFFFFF" />
             ) : (
               <Text style={styles.buttonText}>Sign Up</Text>
             )}
           </Pressable>
         </View>
 
-        {/* Login Link */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account? </Text>
+          <Text style={[styles.footerText, { color: theme.grey }]}>Already have an account? </Text>
           <Pressable onPress={() => navigation.goBack()}>
-            <Text style={styles.footerLink}>Sign In</Text>
+            <Text style={[styles.footerLink, { color: theme.primary }]}>Sign In</Text>
           </Pressable>
         </View>
       </ScrollView>
 
-      {/* Alert Modal */}
       <ShaafiAlert
         visible={alert.visible}
         title={alert.title}
@@ -188,7 +185,6 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
   },
   content: {
     flexGrow: 1,
@@ -204,18 +200,16 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: colors.primary + '15',
+    backgroundColor: '#2F80ED' + '15',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
   },
   title: {
     ...typography.h1,
-    color: colors.primary,
   },
   subtitle: {
     ...typography.body,
-    color: colors.grey,
     marginTop: spacing.xs,
   },
   form: {
@@ -224,7 +218,6 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.tertiary,
     borderRadius: radius.md,
     paddingHorizontal: spacing.md,
     height: 52,
@@ -233,10 +226,9 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     ...typography.body,
-    color: colors.dark,
   },
   button: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',
@@ -256,12 +248,10 @@ const styles = StyleSheet.create({
   },
   footerText: {
     ...typography.body,
-    color: colors.grey,
   },
   footerLink: {
     ...typography.body,
     fontWeight: '600',
-    color: colors.primary,
   },
 });
 

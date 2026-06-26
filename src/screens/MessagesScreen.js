@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import MessageItem from '../components/MessageItem';
@@ -41,22 +41,22 @@ const mockMessages = [
 ];
 
 const MessagesScreen = () => {
+  const { theme } = useTheme();
+
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <View style={styles.container}>
-        {/* Search Bar */}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]} edges={['top']}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.searchContainer}>
-          <View style={styles.searchBar}>
-            <Ionicons name="search-outline" size={20} color={colors.grey} />
+          <View style={[styles.searchBar, { backgroundColor: theme.surface, borderColor: theme.border }]}>
+            <Ionicons name="search-outline" size={20} color={theme.grey} />
             <TextInput
-              style={styles.searchInput}
+              style={[styles.searchInput, { color: theme.dark }]}
               placeholder="Search messages"
-              placeholderTextColor={colors.grey}
+              placeholderTextColor={theme.grey}
             />
           </View>
         </View>
 
-        {/* Messages List */}
         <FlatList
           data={mockMessages}
           keyExtractor={(item) => item.id}
@@ -80,11 +80,9 @@ const MessagesScreen = () => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.tertiary,
   },
   searchContainer: {
     paddingHorizontal: spacing.md,
@@ -93,18 +91,15 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: colors.white,
     borderRadius: radius.full,
     height: 48,
     paddingHorizontal: spacing.md,
     gap: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.lightGrey,
   },
   searchInput: {
     flex: 1,
     ...typography.body,
-    color: colors.dark,
   },
   list: {
     paddingTop: spacing.sm,

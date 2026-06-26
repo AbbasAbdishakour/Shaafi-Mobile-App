@@ -8,41 +8,37 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../theme/colors';
+import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
 import { shadow } from '../theme/shadows';
 
 const BookingSuccessScreen = ({ route, navigation }) => {
+  const { theme } = useTheme();
   const { doctor, selectedDay, selectedTime } = route.params;
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.container}>
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.surface }]}>
+      <View style={[styles.container, { backgroundColor: theme.surface }]}>
         <View style={styles.content}>
-          {/* Success Icon */}
-          <Ionicons name="checkmark-circle" size={100} color={colors.success} />
+          <Ionicons name="checkmark-circle" size={100} color={theme.success} />
 
-          {/* Title */}
-          <Text style={styles.title}>Booking Confirmed!</Text>
+          <Text style={[styles.title, { color: theme.dark }]}>Booking Confirmed!</Text>
 
-          {/* Subtitle */}
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, { color: theme.grey }]}>
             Your appointment has been successfully booked.
           </Text>
 
-          {/* Summary Box */}
-          <View style={styles.summaryCard}>
-            <View style={styles.summaryLeft} />
+          <View style={[styles.summaryCard, { backgroundColor: theme.surface }]}>
+            <View style={[styles.summaryLeft, { backgroundColor: theme.primary }]} />
             <View style={styles.summaryContent}>
-              <Text style={styles.doctorName}>{doctor.name}</Text>
-              <Text style={styles.summaryDetail}>
+              <Text style={[styles.doctorName, { color: theme.dark }]}>{doctor.name}</Text>
+              <Text style={[styles.summaryDetail, { color: theme.grey }]}>
                 {selectedDay} at {selectedTime}
               </Text>
             </View>
           </View>
 
-          {/* Buttons */}
           <Pressable
             style={styles.primaryButton}
             onPress={() =>
@@ -56,7 +52,7 @@ const BookingSuccessScreen = ({ route, navigation }) => {
           </Pressable>
 
           <Pressable
-            style={styles.secondaryButton}
+            style={[styles.secondaryButton, { backgroundColor: theme.surface, borderColor: theme.primary }]}
             onPress={() =>
               navigation.reset({
                 index: 0,
@@ -64,7 +60,7 @@ const BookingSuccessScreen = ({ route, navigation }) => {
               })
             }
           >
-            <Text style={styles.secondaryButtonText}>Go to Home</Text>
+            <Text style={[styles.secondaryButtonText, { color: theme.primary }]}>Go to Home</Text>
           </Pressable>
         </View>
       </View>
@@ -75,11 +71,9 @@ const BookingSuccessScreen = ({ route, navigation }) => {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.white,
   },
   container: {
     flex: 1,
-    backgroundColor: colors.white,
     justifyContent: 'center',
   },
   content: {
@@ -93,14 +87,12 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     ...typography.body,
-    color: colors.grey,
     textAlign: 'center',
     marginTop: spacing.sm,
     lineHeight: 22,
   },
   summaryCard: {
     flexDirection: 'row',
-    backgroundColor: colors.white,
     borderRadius: radius.lg,
     marginTop: spacing.xl,
     marginBottom: spacing.xl,
@@ -110,7 +102,6 @@ const styles = StyleSheet.create({
   },
   summaryLeft: {
     width: 4,
-    backgroundColor: colors.primary,
   },
   summaryContent: {
     flex: 1,
@@ -119,15 +110,13 @@ const styles = StyleSheet.create({
   doctorName: {
     ...typography.body,
     fontWeight: '600',
-    color: colors.dark,
   },
   summaryDetail: {
     ...typography.bodySmall,
-    color: colors.grey,
     marginTop: spacing.xs,
   },
   primaryButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#2F80ED',
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',
@@ -139,19 +128,16 @@ const styles = StyleSheet.create({
     ...typography.button,
   },
   secondaryButton: {
-    backgroundColor: colors.white,
     height: 56,
     borderRadius: radius.lg,
     alignItems: 'center',
     justifyContent: 'center',
     width: '100%',
     borderWidth: 1.5,
-    borderColor: colors.primary,
   },
   secondaryButtonText: {
     ...typography.body,
     fontWeight: '600',
-    color: colors.primary,
   },
 });
 

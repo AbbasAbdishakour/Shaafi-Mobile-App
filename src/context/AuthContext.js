@@ -6,18 +6,19 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [userRole, setUserRole] = useState(null); // 'patient' | 'doctor'
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      setUserRole(session?.user?.user_metadata?.role ?? null);
       setLoading(false);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      setUserRole(session?.user?.user_metadata?.role ?? null);
     });
 
     return () => subscription.unsubscribe();
@@ -29,13 +30,14 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const signUp = async (email, password, fullName) => {
+  const signUp = async (email, password, fullName, role = 'patient') => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         data: {
           full_name: fullName,
+          role: role,
         },
       },
     });
@@ -46,16 +48,19 @@ export const AuthProvider = ({ children }) => {
   const signOut = async () => {
     await supabase.auth.signOut();
     setUser(null);
+    setUserRole(null);
   };
 
-  // Helper to get user's full name
   const getUserName = () => {
     if (!user) return 'User';
     return user.user_metadata?.full_name || user.email?.split('@')[0] || 'User';
   };
 
+  const isDoctor = () => userRole === 'doctor';
+  const isPatient = () => userRole === 'patient' || !userRole;
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, getUserName }}>
+    <AuthContext.Provider value={{ user, loading, userRole, signIn, signUp, signOut, getUserName, isDoctor, isPatient }}>
       {children}
     </AuthContext.Provider>
   );
