@@ -11,52 +11,34 @@
   <aside class="sidebar" id="sidebar"></aside>
 
   <main class="main-content">
-    <div class="page-header">
-      <h1>Manage Doctors</h1>
-    </div>
+    <div class="page-header"><h1>Manage Doctors</h1></div>
     <div class="page-body">
       <div id="alert-container"></div>
 
       <div class="card">
-        <div class="card-header">
-          <span style="color: var(--warning);">⏳ Pending Approvals</span>
-          <span id="pending-count" class="badge badge-warning">0</span>
-        </div>
-        <table>
-          <thead><tr><th>Name</th><th>Specialty</th><th>Hospital</th><th>Experience</th><th>Price</th><th>Actions</th></tr></thead>
+        <div class="card-header"><span style="color: var(--warning);">⏳ Pending Approvals</span><span id="pending-count" class="badge badge-warning">0</span></div>
+        <table><thead><tr><th>Name</th><th>Specialty</th><th>Hospital</th><th>Experience</th><th>Price</th><th>Actions</th></tr></thead>
           <tbody id="pending-body"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--grey);">Loading...</td></tr></tbody>
         </table>
       </div>
 
       <div class="card">
-        <div class="card-header">
-          <span>👨‍⚕️ Approved Doctors</span>
-          <span id="approved-count" class="badge badge-success">0</span>
-        </div>
-        <table>
-          <thead><tr><th>Name</th><th>Specialty</th><th>Hospital</th><th>Status</th><th>Actions</th></tr></thead>
+        <div class="card-header"><span>👨‍⚕️ Approved Doctors</span><span id="approved-count" class="badge badge-success">0</span></div>
+        <table><thead><tr><th>Name</th><th>Specialty</th><th>Hospital</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="approved-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">Loading...</td></tr></tbody>
         </table>
       </div>
 
       <div class="card">
-        <div class="card-header">
-          <span style="color: var(--danger);">🚫 Rejected Doctors</span>
-          <span id="rejected-count" class="badge badge-danger">0</span>
-        </div>
-        <table>
-          <thead><tr><th>Name</th><th>Specialty</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+        <div class="card-header"><span style="color: var(--danger);">🚫 Rejected Doctors</span><span id="rejected-count" class="badge badge-danger">0</span></div>
+        <table><thead><tr><th>Name</th><th>Specialty</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="rejected-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No rejected doctors</td></tr></tbody>
         </table>
       </div>
 
       <div class="card">
-        <div class="card-header">
-          <span style="color: var(--danger);">⛔ Revoked Doctors</span>
-          <span id="revoked-count" class="badge badge-danger">0</span>
-        </div>
-        <table>
-          <thead><tr><th>Name</th><th>Specialty</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+        <div class="card-header"><span style="color: var(--danger);">⛔ Revoked Doctors</span><span id="revoked-count" class="badge badge-danger">0</span></div>
+        <table><thead><tr><th>Name</th><th>Specialty</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody id="revoked-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No revoked doctors</td></tr></tbody>
         </table>
       </div>
@@ -112,7 +94,7 @@
 
       document.getElementById('approved-body').innerHTML = approved.length === 0
         ? '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No approved doctors</td></tr>'
-        : approved.map(d => `<tr><td><strong>${d.name}</strong></td><td>${d.specialty}</td><td>${d.hospital}</td><td>${statusBadge('approved')}</td><td><button class="btn btn-outline btn-sm" onclick="openRevokeModal('${d.id}')">Revoke</button><button class="btn btn-danger btn-sm" onclick="deleteDoctor('${d.id}', this)">Delete</button></td></tr>`).join('');
+        : approved.map(d => `<tr><td><strong>${d.name}</strong></td><td>${d.specialty}</td><td>${d.hospital}</td><td>${statusBadge('approved')}</td><td><button class="btn btn-outline btn-sm" onclick="openRejectModal('${d.id}')">Reject</button><button class="btn btn-outline btn-sm" onclick="openRevokeModal('${d.id}')">Revoke</button><button class="btn btn-danger btn-sm" onclick="deleteDoctor('${d.id}', this)">Delete</button></td></tr>`).join('');
 
       document.getElementById('rejected-body').innerHTML = rejected.length === 0
         ? '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No rejected doctors</td></tr>'
