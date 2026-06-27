@@ -1,4 +1,4 @@
-// src/screens/LoginScreen.js
+// src/auth/LoginScreen.js
 import React, { useState } from 'react';
 import {
   View,
@@ -121,6 +121,17 @@ const LoginScreen = ({ navigation }) => {
             <Text style={[styles.footerLink, { color: theme.primary }]}>Sign Up</Text>
           </Pressable>
         </View>
+
+        {/* Doctor Registration Link */}
+        <Pressable
+          style={styles.doctorLink}
+          onPress={() => navigation.navigate('DoctorLogin')}
+        >
+          <Ionicons name="medkit-outline" size={16} color={theme.secondary} />
+          <Text style={[styles.doctorLinkText, { color: theme.secondary }]}>
+            Are you a doctor? Join as a provider
+          </Text>
+        </Pressable>
       </View>
 
       <ShaafiAlert
@@ -205,6 +216,17 @@ const styles = StyleSheet.create({
   footerLink: {
     ...typography.body,
     fontWeight: '600',
+  },
+  doctorLink: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: spacing.lg,
+    gap: spacing.xs,
+  },
+  doctorLinkText: {
+    ...typography.bodySmall,
+    fontWeight: '500',
   },
 });
 

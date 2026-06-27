@@ -11,12 +11,12 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
-import { typography } from '../theme/typography';
-import { spacing, radius } from '../theme/spacing';
-import { supabase } from '../config/supabase';
-import { useAuth } from '../context/AuthContext';
-import ShaafiAlert from '../components/ShaafiAlert';
+import { useTheme } from '../../context/ThemeContext';
+import { typography } from '../../theme/typography';
+import { spacing, radius } from '../../theme/spacing';
+import { supabase } from '../../config/supabase';
+import { useAuth } from '../../context/AuthContext';
+import ShaafiAlert from '../../components/ShaafiAlert';
 
 const ProfileScreen = () => {
   const { theme, isDark, toggleTheme } = useTheme();

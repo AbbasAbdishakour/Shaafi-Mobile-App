@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaafi Admin — Appointments</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Appointments</h1>
+    </div>
+    <div class="page-body">
+      <div id="alert-container"></div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterAppointments('all', this)">All</button>
+        <button class="filter-tab" onclick="filterAppointments('confirmed', this)">Confirmed</button>
+        <button class="filter-tab" onclick="filterAppointments('pending', this)">Pending</button>
+        <button class="filter-tab" onclick="filterAppointments('cancelled', this)">Cancelled</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span>📅 All Appointments</span>
+          <span id="appointment-count" class="badge badge-success">0</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Doctor</th><th>Patient ID</th><th>Date</th><th>Time</th><th>Status</th><th>Booked On</th></tr>
+          </thead>
+          <tbody id="appointments-body">
+            <tr><td colspan="6" style="text-align:center;padding:24px;color:var(--grey);">
+              <div class="spinner" style="border-color:var(--light-grey);border-top-color:var(--primary);margin:0 auto 12px;"></div>
+              Loading...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/admin.js"></script>
+  <script>
+    let allAppointments = [];
+
+    (async () => {
+      const user = await checkAuth();
+      if (!user) return;
+      loadSidebar('Appointments');
+
+      const { data } = await sb.from('appointments').select('*').order('created_at', { ascending: false });
+      allAppointments = data || [];
+      filterAppointments('all');
+    })();
+
+    function filterAppointments(status, btn) {
+      if (btn) {
+        document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      }
+
+      const filtered = status === 'all' ? allAppointments : allAppointments.filter(a => a.status === status);
+      document.getElementById('appointment-count').textContent = filtered.length;
+
+      const tbody = document.getElementById('appointments-body');
+      tbody.innerHTML = filtered.length === 0
+        ? '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--grey);">No appointments found</td></tr>'
+        : filtered.map(a => `
+          <tr>
+            <td><strong>${a.doctor_name || '-'}</strong></td>
+            <td>${a.user_id?.slice(0, 10) || '-'}...</td>
+            <td>${a.date || '-'}</td>
+            <td>${a.time || '-'}</td>
+            <td>${statusBadge(a.status)}</td>
+            <td>${formatDate(a.created_at)}</td>
+          </tr>
+        `).join('');
+    }
+  </script>
+</body>
+</html>

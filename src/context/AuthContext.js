@@ -6,23 +6,53 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null); // 'patient' | 'doctor'
+  const [userRole, setUserRole] = useState(null);
+  const [doctorId, setDoctorId] = useState(null);
+  const [patientId, setPatientId] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setUser(session?.user ?? null);
-      setUserRole(session?.user?.user_metadata?.role ?? null);
+      const role = session?.user?.user_metadata?.role ?? null;
+      setUserRole(role);
+      if (session?.user && role === 'doctor') {
+        await fetchDoctorId(session.user);
+      }
+      if (session?.user && (role === 'patient' || !role)) {
+        await fetchPatientId(session.user);
+      }
       setLoading(false);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setUser(session?.user ?? null);
-      setUserRole(session?.user?.user_metadata?.role ?? null);
+      const role = session?.user?.user_metadata?.role ?? null;
+      setUserRole(role);
+      if (session?.user && role === 'doctor') {
+        await fetchDoctorId(session.user);
+        setPatientId(null);
+      } else if (session?.user && (role === 'patient' || !role)) {
+        await fetchPatientId(session.user);
+        setDoctorId(null);
+      } else {
+        setDoctorId(null);
+        setPatientId(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchDoctorId = async (currentUser) => {
+    const { data } = await supabase.from('doctors').select('id').eq('user_id', currentUser.id).single();
+    setDoctorId(data?.id || null);
+  };
+
+  const fetchPatientId = async (currentUser) => {
+    const { data } = await supabase.from('patients').select('id').eq('user_id', currentUser.id).single();
+    setPatientId(data?.id || null);
+  };
 
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -32,14 +62,8 @@ export const AuthProvider = ({ children }) => {
 
   const signUp = async (email, password, fullName, role = 'patient') => {
     const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          role: role,
-        },
-      },
+      email, password,
+      options: { data: { full_name: fullName, role: role } },
     });
     if (error) throw error;
     return data;
@@ -47,8 +71,7 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     await supabase.auth.signOut();
-    setUser(null);
-    setUserRole(null);
+    setUser(null); setUserRole(null); setDoctorId(null); setPatientId(null);
   };
 
   const getUserName = () => {
@@ -60,7 +83,7 @@ export const AuthProvider = ({ children }) => {
   const isPatient = () => userRole === 'patient' || !userRole;
 
   return (
-    <AuthContext.Provider value={{ user, loading, userRole, signIn, signUp, signOut, getUserName, isDoctor, isPatient }}>
+    <AuthContext.Provider value={{ user, loading, userRole, doctorId, patientId, signIn, signUp, signOut, getUserName, isDoctor, isPatient }}>
       {children}
     </AuthContext.Provider>
   );

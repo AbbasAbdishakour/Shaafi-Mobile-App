@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaafi Admin — Reports</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+  <main class="main-content">
+    <div class="page-header"><h1>Reports & Analytics</h1></div>
+    <div class="page-body">
+      <div id="alert-container"></div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon" style="background:#2F80ED15; color:#2F80ED;">💰</div><div class="stat-info"><div class="stat-value" id="total-revenue">-</div><div class="stat-label">Total Revenue</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#34C75915; color:#34C759;">📅</div><div class="stat-info"><div class="stat-value" id="total-appointments">-</div><div class="stat-label">Total Appointments</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#FF950015; color:#FF9500;">⭐</div><div class="stat-info"><div class="stat-value" id="top-specialty">-</div><div class="stat-label">Top Specialty</div></div></div>
+        <div class="stat-card"><div class="stat-icon" style="background:#FF3B3015; color:#FF3B30;">🔄</div><div class="stat-info"><div class="stat-value" id="completion-rate">-</div><div class="stat-label">Completion Rate</div></div></div>
+      </div>
+      <div class="card" style="margin-bottom:24px;"><div class="card-header">Revenue by Specialty</div>
+        <table><thead><tr><th>Specialty</th><th>Appointments</th><th>Revenue</th></tr></thead><tbody id="specialty-body"><tr><td colspan="3" style="text-align:center;padding:24px;color:var(--grey);">Loading...</td></tr></tbody></table>
+      </div>
+      <div class="card"><div class="card-header">Top Doctors</div>
+        <table><thead><tr><th>Doctor</th><th>Specialty</th><th>Appointments</th><th>Revenue</th></tr></thead><tbody id="top-doctors-body"><tr><td colspan="4" style="text-align:center;padding:24px;color:var(--grey);">Loading...</td></tr></tbody></table>
+      </div>
+    </div>
+  </main>
+  <script src="js/admin.js"></script>
+  <script>
+    (async () => {
+      const user = await checkAuth(); if (!user) return; loadSidebar('Reports');
+      const [appointmentsRes, paymentsRes] = await Promise.all([
+        sb.from('appointments').select('*'),
+        sb.from('payments').select('*')
+      ]);
+      const appointments = appointmentsRes.data || [];
+      const payments = paymentsRes.data || [];
+      const confirmed = appointments.filter(a => a.status === 'confirmed');
+      const total = appointments.length;
+      const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+
+      document.getElementById('total-revenue').textContent = formatCurrency(totalRevenue);
+      document.getElementById('total-appointments').textContent = total;
+
+      const specialtyCount = {};
+      const specialtyRevenue = {};
+      payments.forEach(p => {
+        const appt = appointments.find(a => a.id === p.appointment_id);
+        const spec = appt?.specialty || 'Unknown';
+        specialtyCount[spec] = (specialtyCount[spec] || 0) + 1;
+        specialtyRevenue[spec] = (specialtyRevenue[spec] || 0) + (p.amount || 0);
+      });
+
+      const topSpecialty = Object.entries(specialtyCount).sort((a,b) => b[1] - a[1])[0];
+      document.getElementById('top-specialty').textContent = topSpecialty ? topSpecialty[0] : 'N/A';
+      document.getElementById('completion-rate').textContent = total > 0 ? Math.round((confirmed.length / total) * 100) + '%' : '0%';
+
+      const specialtyEntries = Object.entries(specialtyRevenue).sort((a,b) => b[1] - a[1]);
+      document.getElementById('specialty-body').innerHTML = specialtyEntries.length === 0
+        ? '<tr><td colspan="3" style="text-align:center;padding:24px;color:var(--grey);">No data yet</td></tr>'
+        : specialtyEntries.map(([s, r]) => `<tr><td><strong>${s}</strong></td><td>${specialtyCount[s] || 0}</td><td>${formatCurrency(r)}</td></tr>`).join('');
+
+      const doctorStats = {};
+      payments.forEach(p => {
+        const appt = appointments.find(a => a.id === p.appointment_id);
+        const name = appt?.doctor_name || 'Unknown';
+        if (!doctorStats[name]) doctorStats[name] = { count: 0, revenue: 0, specialty: appt?.specialty || '' };
+        doctorStats[name].count++;
+        doctorStats[name].revenue += (p.amount || 0);
+      });
+      const topDoctors = Object.entries(doctorStats).sort((a,b) => b[1].revenue - a[1].revenue).slice(0, 10);
+      document.getElementById('top-doctors-body').innerHTML = topDoctors.length === 0
+        ? '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--grey);">No data yet</td></tr>'
+        : topDoctors.map(([name, data]) => `<tr><td><strong>${name}</strong></td><td>${data.specialty}</td><td>${data.count}</td><td>${formatCurrency(data.revenue)}</td></tr>`).join('');
+    })();
+  </script>
+</body>
+</html>

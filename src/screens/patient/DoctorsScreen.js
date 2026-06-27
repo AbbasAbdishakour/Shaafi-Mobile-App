@@ -9,12 +9,12 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
-import { typography } from '../theme/typography';
-import { spacing, radius } from '../theme/spacing';
-import { supabase } from '../config/supabase';
-import DoctorCardSmall from '../components/DoctorCardSmall';
-import SpecialtyChip from '../components/SpecialtyChip';
+import { useTheme } from '../../context/ThemeContext';
+import { typography } from '../../theme/typography';
+import { spacing, radius } from '../../theme/spacing';
+import { supabase } from '../../config/supabase';
+import DoctorCardSmall from '../../components/DoctorCardSmall';
+import SpecialtyChip from '../../components/SpecialtyChip';
 
 const DoctorsScreen = ({ navigation }) => {
   const { theme } = useTheme();

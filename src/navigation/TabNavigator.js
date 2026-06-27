@@ -1,11 +1,11 @@
 // src/navigation/TabNavigator.js
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeScreen from '../screens/HomeScreen';
-import DoctorsScreen from '../screens/DoctorsScreen';
-import MyBookingsScreen from '../screens/MyBookingsScreen';
-import MessagesScreen from '../screens/MessagesScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import HomeScreen from '../screens/patient/HomeScreen';
+import DoctorsScreen from '../screens/patient/DoctorsScreen';
+import MyBookingsScreen from '../screens/patient/MyBookingsScreen';
+import MessagesScreen from '../screens/patient/MessagesScreen';
+import ProfileScreen from '../screens/patient/ProfileScreen';
 import CustomTabBar from '../components/CustomTabBar';
 
 const Tab = createBottomTabNavigator();

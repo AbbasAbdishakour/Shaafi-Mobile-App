@@ -1,4 +1,4 @@
-// src/screens/RegisterScreen.js
+// src/auth/RegisterScreen.js
 import React, { useState } from 'react';
 import {
   View,
@@ -15,6 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { typography } from '../theme/typography';
 import { spacing, radius } from '../theme/spacing';
+import { supabase } from '../config/supabase';
 import { useAuth } from '../context/AuthContext';
 import ShaafiAlert from '../components/ShaafiAlert';
 
@@ -52,10 +53,26 @@ const RegisterScreen = ({ navigation }) => {
     }
     setLoading(true);
     try {
-      await signUp(email, password, name);
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: name, role: 'patient' } },
+      });
+      if (authError) throw authError;
+
+      const userId = authData.user?.id;
+      if (!userId) throw new Error('Failed to create account.');
+
+      const { error: patientError } = await supabase.from('patients').insert({
+        user_id: userId,
+        full_name: name,
+        email,
+      });
+      if (patientError) throw patientError;
+
       showAlert(
         'Account Created!',
-        'Your account has been created successfully. Please check your email to verify your account, then sign in.',
+        'Your account has been created successfully. Please check your email to verify, then sign in.',
         'checkmark-circle',
         theme.success,
         () => navigation.goBack()
@@ -92,69 +109,25 @@ const RegisterScreen = ({ navigation }) => {
         <View style={styles.form}>
           <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
             <Ionicons name="person-outline" size={20} color={theme.grey} />
-            <TextInput
-              style={[styles.input, { color: theme.dark }]}
-              placeholder="Full Name"
-              placeholderTextColor={theme.grey}
-              value={name}
-              onChangeText={setName}
-            />
+            <TextInput style={[styles.input, { color: theme.dark }]} placeholder="Full Name" placeholderTextColor={theme.grey} value={name} onChangeText={setName} />
           </View>
-
           <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
             <Ionicons name="mail-outline" size={20} color={theme.grey} />
-            <TextInput
-              style={[styles.input, { color: theme.dark }]}
-              placeholder="Email"
-              placeholderTextColor={theme.grey}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
+            <TextInput style={[styles.input, { color: theme.dark }]} placeholder="Email" placeholderTextColor={theme.grey} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
           </View>
-
           <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
             <Ionicons name="lock-closed-outline" size={20} color={theme.grey} />
-            <TextInput
-              style={[styles.input, { color: theme.dark }]}
-              placeholder="Password"
-              placeholderTextColor={theme.grey}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-            />
+            <TextInput style={[styles.input, { color: theme.dark }]} placeholder="Password" placeholderTextColor={theme.grey} value={password} onChangeText={setPassword} secureTextEntry={!showPassword} />
             <Pressable onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons
-                name={showPassword ? 'eye-outline' : 'eye-off-outline'}
-                size={20}
-                color={theme.grey}
-              />
+              <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={20} color={theme.grey} />
             </Pressable>
           </View>
-
           <View style={[styles.inputContainer, { backgroundColor: theme.inputBg }]}>
             <Ionicons name="lock-closed-outline" size={20} color={theme.grey} />
-            <TextInput
-              style={[styles.input, { color: theme.dark }]}
-              placeholder="Confirm Password"
-              placeholderTextColor={theme.grey}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
+            <TextInput style={[styles.input, { color: theme.dark }]} placeholder="Confirm Password" placeholderTextColor={theme.grey} value={confirmPassword} onChangeText={setConfirmPassword} secureTextEntry />
           </View>
-
-          <Pressable
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleRegister}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#FFFFFF" />
-            ) : (
-              <Text style={styles.buttonText}>Sign Up</Text>
-            )}
+          <Pressable style={[styles.button, loading && styles.buttonDisabled]} onPress={handleRegister} disabled={loading}>
+            {loading ? <ActivityIndicator color="#FFFFFF" /> : <Text style={styles.buttonText}>Sign Up</Text>}
           </Pressable>
         </View>
 
@@ -166,93 +139,27 @@ const RegisterScreen = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      <ShaafiAlert
-        visible={alert.visible}
-        title={alert.title}
-        message={alert.message}
-        icon={alert.icon}
-        iconColor={alert.iconColor}
-        confirmText="OK"
-        onConfirm={() => {
-          hideAlert();
-          if (alert.onConfirm) alert.onConfirm();
-        }}
-      />
+      <ShaafiAlert visible={alert.visible} title={alert.title} message={alert.message} icon={alert.icon} iconColor={alert.iconColor} confirmText="OK" onConfirm={() => { hideAlert(); if (alert.onConfirm) alert.onConfirm(); }} />
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.xxl,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: spacing.xl,
-  },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#2F80ED' + '15',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.md,
-  },
-  title: {
-    ...typography.h1,
-  },
-  subtitle: {
-    ...typography.body,
-    marginTop: spacing.xs,
-  },
-  form: {
-    gap: spacing.md,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: radius.md,
-    paddingHorizontal: spacing.md,
-    height: 52,
-    gap: spacing.sm,
-  },
-  input: {
-    flex: 1,
-    ...typography.body,
-  },
-  button: {
-    backgroundColor: '#2F80ED',
-    height: 56,
-    borderRadius: radius.lg,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: spacing.sm,
-  },
-  buttonDisabled: {
-    opacity: 0.7,
-  },
-  buttonText: {
-    ...typography.button,
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: spacing.xl,
-  },
-  footerText: {
-    ...typography.body,
-  },
-  footerLink: {
-    ...typography.body,
-    fontWeight: '600',
-  },
+  container: { flex: 1 },
+  content: { flexGrow: 1, justifyContent: 'center', paddingHorizontal: spacing.xl, paddingVertical: spacing.xxl },
+  header: { alignItems: 'center', marginBottom: spacing.xl },
+  iconContainer: { width: 80, height: 80, borderRadius: 40, backgroundColor: '#2F80ED15', alignItems: 'center', justifyContent: 'center', marginBottom: spacing.md },
+  title: { ...typography.h1 },
+  subtitle: { ...typography.body, marginTop: spacing.xs },
+  form: { gap: spacing.md },
+  inputContainer: { flexDirection: 'row', alignItems: 'center', borderRadius: radius.md, paddingHorizontal: spacing.md, height: 52, gap: spacing.sm },
+  input: { flex: 1, ...typography.body },
+  button: { backgroundColor: '#2F80ED', height: 56, borderRadius: radius.lg, alignItems: 'center', justifyContent: 'center', marginTop: spacing.sm },
+  buttonDisabled: { opacity: 0.7 },
+  buttonText: { ...typography.button },
+  footer: { flexDirection: 'row', justifyContent: 'center', marginTop: spacing.xl },
+  footerText: { ...typography.body },
+  footerLink: { ...typography.body, fontWeight: '600' },
 });
 
 export default RegisterScreen;

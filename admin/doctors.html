@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaafi Admin — Doctors</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Manage Doctors</h1>
+    </div>
+    <div class="page-body">
+      <div id="alert-container"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span style="color: var(--warning);">⏳ Pending Approvals</span>
+          <span id="pending-count" class="badge badge-warning">0</span>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Specialty</th><th>Hospital</th><th>Experience</th><th>Price</th><th>Actions</th></tr></thead>
+          <tbody id="pending-body"><tr><td colspan="6" style="text-align:center;padding:24px;color:var(--grey);">Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span>👨‍⚕️ Approved Doctors</span>
+          <span id="approved-count" class="badge badge-success">0</span>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Specialty</th><th>Hospital</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="approved-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">Loading...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span style="color: var(--danger);">🚫 Rejected Doctors</span>
+          <span id="rejected-count" class="badge badge-danger">0</span>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Specialty</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="rejected-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No rejected doctors</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span style="color: var(--danger);">⛔ Revoked Doctors</span>
+          <span id="revoked-count" class="badge badge-danger">0</span>
+        </div>
+        <table>
+          <thead><tr><th>Name</th><th>Specialty</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="revoked-body"><tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No revoked doctors</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <div id="reject-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:24px; border-radius:16px; max-width:420px; width:90%;">
+      <h3 style="margin-bottom:12px; color:var(--danger);">❌ Reject Doctor</h3>
+      <div class="form-group"><label>Reason</label><select id="reject-reason" class="form-input"><option value="">Select...</option><option value="Insufficient professional experience">Insufficient experience</option><option value="Missing or invalid certifications">Missing certifications</option><option value="Incomplete profile information">Incomplete profile</option><option value="Duplicate application">Duplicate</option><option value="Does not meet platform requirements">Not meeting requirements</option><option value="Other">Other</option></select></div>
+      <div class="form-group"><label>Custom Reason</label><input type="text" id="reject-custom" class="form-input" placeholder="Custom reason..."></div>
+      <div style="display:flex; gap:8px; margin-top:16px;"><button class="btn btn-outline" style="flex:1;" onclick="closeRejectModal()">Cancel</button><button class="btn btn-danger" style="flex:1;" id="confirm-reject-btn" onclick="confirmReject()">Reject</button></div>
+    </div>
+  </div>
+
+  <div id="revoke-modal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:999; justify-content:center; align-items:center;">
+    <div style="background:white; padding:24px; border-radius:16px; max-width:420px; width:90%;">
+      <h3 style="margin-bottom:12px; color:var(--danger);">⛔ Revoke Doctor</h3>
+      <div class="form-group"><label>Reason</label><select id="revoke-reason" class="form-input"><option value="">Select...</option><option value="Violation of platform policies">Violation of policies</option><option value="Patient complaints">Patient complaints</option><option value="Inactive for extended period">Inactive</option><option value="Fraudulent activity detected">Fraudulent activity</option><option value="Requested by doctor">Requested by doctor</option><option value="Other">Other</option></select></div>
+      <div class="form-group"><label>Custom Reason</label><input type="text" id="revoke-custom" class="form-input" placeholder="Custom reason..."></div>
+      <div style="display:flex; gap:8px; margin-top:16px;"><button class="btn btn-outline" style="flex:1;" onclick="closeRevokeModal()">Cancel</button><button class="btn btn-danger" style="flex:1;" id="confirm-revoke-btn" onclick="confirmRevoke()">Revoke</button></div>
+    </div>
+  </div>
+
+  <script src="js/admin.js"></script>
+  <script>
+    let allDoctors = [];
+    let currentRejectId = null;
+    let currentRevokeId = null;
+
+    (async () => { const user = await checkAuth(); if (!user) return; loadSidebar('Doctors'); await loadDoctors(); })();
+
+    async function loadDoctors() {
+      const { data } = await sb.from('doctors').select('*').order('created_at', { ascending: false });
+      allDoctors = data || [];
+      renderTables();
+    }
+
+    function renderTables() {
+      const pending = allDoctors.filter(d => d.status === 'pending');
+      const approved = allDoctors.filter(d => d.status === 'approved');
+      const rejected = allDoctors.filter(d => d.status === 'rejected');
+      const revoked = allDoctors.filter(d => d.status === 'revoked');
+
+      document.getElementById('pending-count').textContent = pending.length;
+      document.getElementById('approved-count').textContent = approved.length;
+      document.getElementById('rejected-count').textContent = rejected.length;
+      document.getElementById('revoked-count').textContent = revoked.length;
+
+      document.getElementById('pending-body').innerHTML = pending.length === 0
+        ? '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--success);">✅ No pending doctors!</td></tr>'
+        : pending.map(d => `<tr><td><strong>${d.name}</strong></td><td>${d.specialty}</td><td>${d.hospital}</td><td>${d.experience} yrs</td><td>$${d.price_per_session}</td><td><button class="btn btn-success btn-sm" onclick="approveDoctor('${d.id}', this)">Approve</button><button class="btn btn-danger btn-sm" onclick="openRejectModal('${d.id}')">Reject</button></td></tr>`).join('');
+
+      document.getElementById('approved-body').innerHTML = approved.length === 0
+        ? '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No approved doctors</td></tr>'
+        : approved.map(d => `<tr><td><strong>${d.name}</strong></td><td>${d.specialty}</td><td>${d.hospital}</td><td>${statusBadge('approved')}</td><td><button class="btn btn-outline btn-sm" onclick="openRevokeModal('${d.id}')">Revoke</button><button class="btn btn-danger btn-sm" onclick="deleteDoctor('${d.id}', this)">Delete</button></td></tr>`).join('');
+
+      document.getElementById('rejected-body').innerHTML = rejected.length === 0
+        ? '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No rejected doctors</td></tr>'
+        : rejected.map(d => `<tr><td><strong>${d.name}</strong></td><td>${d.specialty}</td><td style="color:var(--danger);">${d.rejection_reason || '-'}</td><td>${statusBadge('rejected')}</td><td><button class="btn btn-success btn-sm" onclick="approveDoctor('${d.id}', this)">Re-approve</button></td></tr>`).join('');
+
+      document.getElementById('revoked-body').innerHTML = revoked.length === 0
+        ? '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No revoked doctors</td></tr>'
+        : revoked.map(d => `<tr><td><strong>${d.name}</strong></td><td>${d.specialty}</td><td style="color:var(--danger);">${d.revoked_reason || '-'}</td><td>${statusBadge('revoked')}</td><td><button class="btn btn-success btn-sm" onclick="approveDoctor('${d.id}', this)">Re-approve</button></td></tr>`).join('');
+    }
+
+    async function approveDoctor(id, btn) {
+      btn.disabled = true; btn.textContent = 'Approving...';
+      const { error } = await sb.from('doctors').update({ status: 'approved', rejection_reason: null, revoked_reason: null }).eq('id', id);
+      if (error) { showAlert('Failed: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Approve'; }
+      else { showAlert('Doctor approved!', 'success'); await loadDoctors(); }
+    }
+
+    function openRejectModal(id) { currentRejectId = id; document.getElementById('reject-modal').style.display = 'flex'; }
+    function closeRejectModal() { currentRejectId = null; document.getElementById('reject-modal').style.display = 'none'; }
+
+    async function confirmReject() {
+      const reason = document.getElementById('reject-reason').value;
+      const custom = document.getElementById('reject-custom').value;
+      const finalReason = custom || reason || 'Does not meet platform requirements';
+      const btn = document.getElementById('confirm-reject-btn');
+      btn.disabled = true; btn.textContent = 'Rejecting...';
+      const { error } = await sb.from('doctors').update({ status: 'rejected', rejection_reason: finalReason }).eq('id', currentRejectId);
+      if (error) { showAlert('Failed: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Reject'; }
+      else { showAlert('Doctor rejected.', 'success'); closeRejectModal(); await loadDoctors(); }
+    }
+
+    function openRevokeModal(id) { currentRevokeId = id; document.getElementById('revoke-modal').style.display = 'flex'; }
+    function closeRevokeModal() { currentRevokeId = null; document.getElementById('revoke-modal').style.display = 'none'; }
+
+    async function confirmRevoke() {
+      const reason = document.getElementById('revoke-reason').value;
+      const custom = document.getElementById('revoke-custom').value;
+      const finalReason = custom || reason || 'Violation of platform policies';
+      const btn = document.getElementById('confirm-revoke-btn');
+      btn.disabled = true; btn.textContent = 'Revoking...';
+      const { error } = await sb.from('doctors').update({ status: 'revoked', revoked_reason: finalReason }).eq('id', currentRevokeId);
+      if (error) { showAlert('Failed: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Revoke'; }
+      else { showAlert('Doctor revoked.', 'success'); closeRevokeModal(); await loadDoctors(); }
+    }
+
+    async function deleteDoctor(id, btn) {
+      if (!confirm('Permanently delete this doctor?')) return;
+      btn.disabled = true; btn.textContent = 'Deleting...';
+      const { error } = await sb.from('doctors').delete().eq('id', id);
+      if (error) { showAlert('Failed: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Delete'; }
+      else { showAlert('Doctor deleted.', 'success'); await loadDoctors(); }
+    }
+  </script>
+</body>
+</html>

@@ -6,8 +6,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from './src/context/AuthContext';
 import { ThemeProvider, useTheme } from './src/context/ThemeContext';
 import AppNavigator from './src/navigation/AppNavigator';
-import OnboardingScreen from './src/screens/OnboardingScreen';
-
+import OnboardingScreen from './src/onboarding/OnboardingScreen';
 const AppContent = () => {
   const { theme } = useTheme();
   const [showOnboarding, setShowOnboarding] = useState(true);

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shaafi Admin — Patients</title>
+  <link rel="stylesheet" href="css/admin.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <aside class="sidebar" id="sidebar"></aside>
+
+  <main class="main-content">
+    <div class="page-header">
+      <h1>Manage Patients</h1>
+    </div>
+    <div class="page-body">
+      <div id="alert-container"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <span>👥 All Patients</span>
+          <span id="patient-count" class="badge badge-success">0</span>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Email</th><th>Appointments</th><th>Joined</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="patients-body">
+            <tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">
+              <div class="spinner" style="border-color:var(--light-grey);border-top-color:var(--primary);margin:0 auto 12px;"></div>
+              Loading...
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/admin.js"></script>
+  <script>
+    (async () => {
+      const user = await checkAuth();
+      if (!user) return;
+      loadSidebar('Patients');
+      await loadPatients();
+    })();
+
+    async function loadPatients() {
+      const { data: patients } = await sb.from('patients').select('*').order('created_at', { ascending: false });
+      const { data: appointments } = await sb.from('appointments').select('patient_id');
+
+      const appointmentCount = {};
+      (appointments || []).forEach(a => {
+        appointmentCount[a.patient_id] = (appointmentCount[a.patient_id] || 0) + 1;
+      });
+
+      const allPatients = patients || [];
+      document.getElementById('patient-count').textContent = allPatients.length;
+
+      const tbody = document.getElementById('patients-body');
+      tbody.innerHTML = allPatients.length === 0
+        ? '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--grey);">No patients yet</td></tr>'
+        : allPatients.map(p => `
+          <tr>
+            <td><strong>${p.full_name || 'Unknown'}</strong></td>
+            <td>${p.email || '-'}</td>
+            <td>${appointmentCount[p.user_id] || 0}</td>
+            <td>${formatDate(p.created_at)}</td>
+            <td>
+              <button class="btn btn-outline btn-sm" onclick="viewPatient('${p.user_id}')">View</button>
+              <button class="btn btn-danger btn-sm" onclick="deletePatient('${p.id}', '${p.user_id}', this)">Delete</button>
+            </td>
+          </tr>
+        `).join('');
+    }
+
+    function viewPatient(userId) {
+      alert('Patient ID: ' + userId + '\n\nFull patient details view coming soon.');
+    }
+
+    async function deletePatient(id, userId, btn) {
+      if (!confirm('Delete this patient and all their data? This cannot be undone.')) return;
+      btn.disabled = true; btn.textContent = 'Deleting...';
+      await sb.from('appointments').delete().eq('patient_id', userId);
+      await sb.from('payments').delete().eq('patient_id', userId);
+      const { error } = await sb.from('patients').delete().eq('id', id);
+      if (error) { showAlert('Failed: ' + error.message, 'error'); btn.disabled = false; btn.textContent = 'Delete'; }
+      else { showAlert('Patient and all related data deleted.', 'success'); await loadPatients(); }
+    }
+  </script>
+</body>
+</html>

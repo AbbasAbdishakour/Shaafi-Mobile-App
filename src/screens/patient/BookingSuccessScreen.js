@@ -8,10 +8,10 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useTheme } from '../context/ThemeContext';
-import { typography } from '../theme/typography';
-import { spacing, radius } from '../theme/spacing';
-import { shadow } from '../theme/shadows';
+import { useTheme } from '../../context/ThemeContext';
+import { typography } from '../../theme/typography';
+import { spacing, radius } from '../../theme/spacing';
+import { shadow } from '../../theme/shadows';
 
 const BookingSuccessScreen = ({ route, navigation }) => {
   const { theme } = useTheme();
