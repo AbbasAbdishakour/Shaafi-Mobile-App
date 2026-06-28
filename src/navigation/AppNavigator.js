@@ -59,8 +59,8 @@ const AppNavigator = () => {
       case 'approved':
         return (
           <>
-            <Stack.Screen name="DoctorTabs" component={DoctorTabNavigator} options={{ headerShown: false }} />
             <Stack.Screen name="DoctorApproved" component={DoctorApprovedScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="DoctorTabs" component={DoctorTabNavigator} options={{ headerShown: false }} />
             <Stack.Screen name="DoctorProfileEdit" component={DoctorProfileEditScreen} options={{ title: 'Edit Profile' }} />
           </>
         );

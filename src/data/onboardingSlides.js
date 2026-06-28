@@ -41,6 +41,7 @@ export const onboardingSlides = [
       { name: 'Shuaib Nouh Nour', role: 'UI/UX Designer' },
       { name: 'Sharmarke Adam Mohamed', role: 'Full Stack Developer' },
       { name: 'Ayanle Rople Hassan', role: 'Mobile Developer' },
+
     ],
   },
 ];
