@@ -22,7 +22,7 @@ const DoctorAppointmentsScreen = () => {
   const [alert, setAlert] = useState({ visible: false, title: '', message: '', icon: '', iconColor: '' });
 
   const tabs = [
-    { key: 'all', label: 'All' }, { key: 'pending', label: 'Pending' },
+    { key: 'all', label: 'All' },
     { key: 'confirmed', label: 'Confirmed' }, { key: 'completed', label: 'Completed' },
     { key: 'cancelled', label: 'Cancelled' },
   ];
