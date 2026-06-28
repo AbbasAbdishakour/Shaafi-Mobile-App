@@ -54,6 +54,7 @@ const DoctorLoginScreen = ({ navigation }) => {
           <View style={styles.iconContainer}>
             <Ionicons name="medkit" size={48} color={theme.primary} />
           </View>
+          <Text style={[styles.title, { color: theme.primary }]}>Welcome to Shaafi</Text>
           <Text style={[styles.title, { color: theme.primary }]}>Doctor Sign In</Text>
           <Text style={[styles.subtitle, { color: theme.grey }]}>Access your doctor dashboard</Text>
         </View>

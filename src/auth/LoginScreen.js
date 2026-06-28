@@ -46,6 +46,7 @@ const LoginScreen = ({ navigation }) => {
             <Ionicons name="medical" size={48} color={PATIENT_COLOR} />
           </View>
           <Text style={[styles.title, { color: PATIENT_COLOR }]}>Welcome to Shaafi</Text>
+          <Text style={[styles.title, { color: PATIENT_COLOR }]}>Patient Sign In</Text>
           <Text style={[styles.subtitle, { color: theme.grey }]}>Sign in to book appointments</Text>
         </View>
         <View style={styles.form}>
